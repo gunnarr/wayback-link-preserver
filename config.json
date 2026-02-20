@@ -1,0 +1,8 @@
+{
+  "params": {
+    "wlp_indicator_style": "icon",
+    "wlp_cache_days": "7",
+    "wlp_max_links": "30",
+    "wlp_disabled": false
+  }
+}

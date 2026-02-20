@@ -1,0 +1,15 @@
+{{ if not .Site.Params.wlp_disabled }}
+<!--
+  Wayback Link Preserver v1.0.0
+  Checks external links against the Internet Archive and shows archive indicators.
+  https://github.com/YOUR_USERNAME/wayback-link-preserver
+-->
+<script>
+window.WaybackLinkPreserver = {
+  indicatorStyle: {{ .Site.Params.wlp_indicator_style | default "icon" | jsonify }},
+  cacheDays: parseInt({{ .Site.Params.wlp_cache_days | default "7" | jsonify }}, 10) || 7,
+  maxLinksPerPage: parseInt({{ .Site.Params.wlp_max_links | default "30" | jsonify }}, 10) || 30
+};
+</script>
+<script src="/js/wayback-link-preserver.js" defer></script>
+{{ end }}

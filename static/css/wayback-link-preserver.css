@@ -1,0 +1,101 @@
+/* ==========================================================================
+   Wayback Link Preserver — Styles
+   Subtle archive indicators for external links with Wayback Machine snapshots.
+   ========================================================================== */
+
+/* --- Archive indicator (the small icon/text after a link) --- */
+
+.wlp-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.15em;
+  margin-left: 0.2em;
+  padding: 0.1em 0.2em;
+  border-radius: 3px;
+  color: inherit;
+  opacity: 0.3;
+  text-decoration: none;
+  transition: opacity 0.2s ease, background-color 0.2s ease;
+  vertical-align: baseline;
+  line-height: 1;
+}
+
+.wlp-indicator:hover,
+.wlp-indicator:focus-visible {
+  opacity: 0.85;
+  background-color: rgba(0, 0, 0, 0.05);
+  outline: none;
+}
+
+/* Icon sizing */
+.wlp-indicator svg {
+  width: 0.75em;
+  height: 0.75em;
+  flex-shrink: 0;
+  vertical-align: -0.05em;
+}
+
+/* Text label */
+.wlp-indicator-text {
+  font-size: 0.7em;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+/* --- Tooltip (appears on hover) --- */
+
+.wlp-indicator[title] {
+  cursor: help;
+}
+
+/* --- Optional: mark links that have archives --- */
+
+a.wlp-has-archive {
+  /* No visible change by default — the indicator does the job. */
+  /* Uncomment below to add a subtle left border: */
+  /* border-left: 2px solid rgba(0, 128, 0, 0.15); */
+  /* padding-left: 0.15em; */
+}
+
+/* --- Loading state (while checking) --- */
+
+.wlp-checking {
+  opacity: 0.15;
+  animation: wlp-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes wlp-pulse {
+  0%, 100% { opacity: 0.15; }
+  50% { opacity: 0.35; }
+}
+
+/* --- Dark mode support --- */
+
+@media (prefers-color-scheme: dark) {
+  .wlp-indicator:hover,
+  .wlp-indicator:focus-visible {
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+}
+
+/* --- Reduced motion --- */
+
+@media (prefers-reduced-motion: reduce) {
+  .wlp-checking {
+    animation: none;
+    opacity: 0.25;
+  }
+
+  .wlp-indicator {
+    transition: none;
+  }
+}
+
+/* --- Print: hide indicators --- */
+
+@media print {
+  .wlp-indicator {
+    display: none !important;
+  }
+}
