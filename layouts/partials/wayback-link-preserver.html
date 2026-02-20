@@ -1,14 +1,16 @@
 {{ if not .Site.Params.wlp_disabled }}
 <!--
-  Wayback Link Preserver v1.0.0
-  Checks external links against the Internet Archive and shows archive indicators.
-  https://github.com/YOUR_USERNAME/wayback-link-preserver
+  Wayback Link Preserver v2.0.0
+  Detects broken links and shows Wayback Machine archive fallbacks.
+  https://github.com/gunnarr/wayback-link-preserver
 -->
 <script>
 window.WaybackLinkPreserver = {
   indicatorStyle: {{ .Site.Params.wlp_indicator_style | default "icon" | jsonify }},
   cacheDays: parseInt({{ .Site.Params.wlp_cache_days | default "7" | jsonify }}, 10) || 7,
-  maxLinksPerPage: parseInt({{ .Site.Params.wlp_max_links | default "30" | jsonify }}, 10) || 30
+  livenessCacheDays: parseInt({{ .Site.Params.wlp_liveness_cache_days | default "1" | jsonify }}, 10) || 1,
+  maxLinksPerPage: parseInt({{ .Site.Params.wlp_max_links | default "30" | jsonify }}, 10) || 30,
+  livenessTimeout: parseInt({{ .Site.Params.wlp_liveness_timeout | default "8000" | jsonify }}, 10) || 8000
 };
 </script>
 <script src="/js/wayback-link-preserver.js" defer></script>

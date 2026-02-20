@@ -1,23 +1,40 @@
 # Wayback Link Preserver
 
-A [Micro.blog](https://micro.blog) plugin that protects your blog against [link rot](https://en.wikipedia.org/wiki/Link_rot). It automatically checks every external link on your pages against the [Internet Archive Wayback Machine](https://web.archive.org/) and adds a small, clickable archive indicator next to links that have been preserved. If a link you shared ever goes offline, your readers will have a one-click fallback to the archived version.
+A [Micro.blog](https://micro.blog) plugin that fights [link rot](https://en.wikipedia.org/wiki/Link_rot). It scans every external link on your pages, detects which ones are broken, and for those that are, shows a clickable [Internet Archive Wayback Machine](https://web.archive.org/) fallback so your readers can still access the content.
 
 ## How It Works
 
-When a reader opens one of your blog posts, the plugin:
+When a reader opens one of your blog posts, the plugin runs two phases:
 
-1. **Finds** all external links inside your post content.
-2. **Checks** each unique URL against the Wayback Machine's public [Availability API](https://archive.org/help/wayback_api.php) to see if an archived snapshot exists.
-3. **Adds a small archive icon** (🗃) next to links that have a snapshot. The icon links directly to the archived version on `web.archive.org`.
-4. **Caches** the results in the reader's browser (via `localStorage`) so subsequent page loads are instant — no repeated API calls.
+### Phase 1 — Liveness check
+
+Every external link on the page gets a lightweight network request (`fetch` with `mode: "no-cors"`) to see if the server behind it still responds. These checks run in parallel (6 at a time by default) and are fast — usually under a second for most pages.
+
+If a server responds at all, the link is considered alive and left untouched.
+
+### Phase 2 — Archive lookup (broken links only)
+
+For links where the server did *not* respond (DNS failure, connection refused, timeout, SSL error), the plugin queries the Wayback Machine's [Availability API](https://archive.org/help/wayback_api.php) to find an archived snapshot.
+
+- **Broken + archived** → A small clickable archive icon appears after the link. Clicking it opens the Wayback Machine copy in a new tab. The link text also gets a subtle strikethrough.
+- **Broken + not archived** → A small broken-link icon appears as a visual hint. No clickable fallback is possible.
+- **Working links** → Nothing changes. No icons, no styling.
+
+### Caching
+
+Both liveness results and archive lookups are cached in the reader's browser (`localStorage`):
+- **Liveness**: cached for 1 day (sites come back online).
+- **Archive data**: cached for 7 days (snapshots don't change often).
+
+Returning visitors trigger zero network requests until caches expire.
 
 ### What it looks like
 
-After a link with an archived version:
+A broken link with an archived version:
 
-> Check out [this great article](https://example.com/article) 🗃
+> Check out ~~[this great article](https://example.com/article)~~ 🗃
 
-The 🗃 icon is subtle and barely visible until hovered. Clicking it opens the Wayback Machine copy in a new tab. Links without archived versions are left completely unchanged.
+The 🗃 icon links to the archived copy. Working links look completely normal.
 
 ## Installation
 
@@ -30,7 +47,7 @@ That's it — the plugin works out of the box with sensible defaults.
 ### Manual installation (from GitHub)
 
 1. Go to **Plug-ins** → **Find Plug-ins** → **Install from URL**.
-2. Enter the GitHub repository URL for this plugin.
+2. Enter: `https://github.com/gunnarr/wayback-link-preserver`
 
 ## Settings
 
@@ -38,127 +55,137 @@ After installing, go to **Plug-ins** → **Wayback Link Preserver** to configure
 
 | Setting | Default | Description |
 |---------|---------|-------------|
-| **Indicator style** | `icon` | How the archive link is displayed. Options: `icon` (small archive icon), `text` (the word "archived"), `both` (icon + text). |
-| **Cache duration (days)** | `7` | How many days lookup results are cached in the reader's browser. Lower values mean more frequent re-checks; higher values reduce API calls. |
-| **Max links per page** | `30` | Maximum number of unique external URLs to check per page load. Keeps things fast on link-heavy pages. |
+| **Indicator style** | `icon` | How the archive link looks. Options: `icon` (small archive icon), `text` (the word "archived"), `both`. |
+| **Archive cache (days)** | `7` | How long Wayback lookup results are cached per reader. |
+| **Liveness cache (days)** | `1` | How long liveness results are cached. Lower = more responsive to sites coming back. |
+| **Max links per page** | `30` | Cap on unique URLs to check per page load. |
+| **Liveness timeout (ms)** | `8000` | How long to wait for a server to respond before declaring it broken. |
 | **Disable plugin** | `false` | Toggle the plugin off without uninstalling it. |
 
 ## Architecture
 
-### Pure client-side — no server required
+### Two-phase, pure client-side — no server required
 
-Unlike the [WordPress Wayback Machine Link Fixer](https://wordpress.org/plugins/internet-archive-wayback-machine-link-fixer/) which uses PHP and background jobs, this plugin runs entirely in the browser. Micro.blog is built on [Hugo](https://gohugo.io/) (a static site generator), so plugins cannot run server-side code. The plugin works within these constraints by using:
-
-- **JSONP** to query the Wayback Machine API directly from the browser (the API doesn't support CORS, so regular `fetch()` won't work).
-- **localStorage** for caching, so the API is only queried once per URL per cache period.
-- **Rate limiting** (one request every 350ms) to stay well under the Wayback Machine's rate limits.
-
-### What this means in practice
-
-- **No background scanning**: Links are checked when a reader visits the page, not ahead of time.
-- **No broken-link detection**: The plugin doesn't check whether links are actually broken. It shows the archive indicator for any link that happens to have a Wayback Machine snapshot, giving readers a ready-made fallback.
-- **No content modification**: Your posts are never modified. The archive indicators are added purely in the browser's DOM.
-
-### File structure
-
-```
-wayback-link-preserver/
-├── plugin.json                     # Plugin manifest for Micro.blog
-├── config.json                     # Default parameter values
-├── LICENSE                         # MIT License
-├── README.md                       # This file
-├── layouts/
-│   └── partials/
-│       └── wayback-link-preserver.html  # Injected into <head>
-└── static/
-    ├── css/
-    │   └── wayback-link-preserver.css   # Indicator styles
-    └── js/
-        └── wayback-link-preserver.js    # Main logic
-```
-
-### Request flow
+Micro.blog is built on [Hugo](https://gohugo.io/) (a static site generator), so plugins cannot run server-side code. This plugin works entirely in the reader's browser:
 
 ```
 Page loads
     │
     ▼
-Find external links in .post-content / .e-content
+Collect external links from post content
     │
     ▼
-For each unique URL:
+╔══════════════════════════════════════════╗
+║  PHASE 1 — Liveness (parallel, fast)    ║
+╠══════════════════════════════════════════╣
+║                                          ║
+║  For each URL (6 concurrent):            ║
+║    ├─ Cached? → use cached result        ║
+║    └─ fetch(url, {mode: "no-cors"})      ║
+║        ├─ Responds → alive (skip)        ║
+║        └─ Error/timeout → broken         ║
+║                                          ║
+╚══════════════════════════════════════════╝
     │
-    ├─ Cached in localStorage? ──yes──▶ Use cached result
-    │
-    └─ Not cached ──▶ Queue JSONP request to:
-                       https://archive.org/wayback/available?url=...&callback=...
-                           │
-                           ▼
-                     Parse response
-                           │
-                   ┌───────┴───────┐
-                   │               │
-              Has snapshot    No snapshot
-                   │               │
-                   ▼               ▼
-            Add indicator     Do nothing
-            Cache: true      Cache: false
+    │  Only broken URLs continue ↓
+    ▼
+╔══════════════════════════════════════════╗
+║  PHASE 2 — Archive lookup (sequential)  ║
+╠══════════════════════════════════════════╣
+║                                          ║
+║  For each broken URL (350ms between):    ║
+║    ├─ Cached? → use cached result        ║
+║    └─ JSONP → archive.org/wayback/...    ║
+║        ├─ Snapshot found → add icon 🗃   ║
+║        └─ Not found → add broken badge   ║
+║                                          ║
+╚══════════════════════════════════════════╝
+```
+
+**Why JSONP?** The Wayback Machine Availability API doesn't return CORS headers, so regular `fetch()` from browsers is blocked. JSONP (supported via the API's `callback` parameter) is the only way to query it directly without a proxy server.
+
+### File structure
+
+```
+wayback-link-preserver/
+├── plugin.json                          # Micro.blog manifest
+├── config.json                          # Default parameter values
+├── LICENSE                              # MIT License
+├── README.md                            # This file
+├── layouts/
+│   └── partials/
+│       └── wayback-link-preserver.html  # Injected into <head>
+└── static/
+    ├── css/
+    │   └── wayback-link-preserver.css   # Indicator & broken link styles
+    └── js/
+        └── wayback-link-preserver.js    # Main logic (two-phase checker)
 ```
 
 ## Privacy
 
-The plugin sends external link URLs to [archive.org](https://archive.org)'s public Availability API. This is the same API used by the [Wayback Machine browser extension](https://web.archive.org/) and millions of other tools.
+**Phase 1** (liveness) sends a no-cors fetch to each external link's own server. This is the same thing a browser does when a reader clicks the link — no extra data is exposed.
 
-**What is sent:** Only the URL of the external link (e.g., `https://example.com/article`).
-
-**What is NOT sent:** No cookies, no visitor information, no IP tracking, no analytics. The requests are made by the reader's browser directly to archive.org.
-
-If you're concerned about sending link URLs to a third party, you can disable the plugin from its settings page.
+**Phase 2** (archive lookup) sends broken link URLs to [archive.org](https://archive.org)'s public API. Only the URL is sent. No cookies, visitor info, or tracking data.
 
 ## Accessibility
 
-- Archive indicators have proper `aria-label` attributes describing what they do.
-- Icons are marked `aria-hidden="true"` so screen readers skip the decorative SVG and read the label instead.
-- Keyboard navigation works: indicators are focusable `<a>` elements with visible focus styles.
-- Print styles hide indicators since they're not useful on paper.
-- The `prefers-reduced-motion` media query disables animations for users who prefer it.
+- Archive indicators have `aria-label` attributes ("Link is broken. View archived version from 2023-10-15").
+- Decorative SVG icons are `aria-hidden="true"`.
+- Keyboard-navigable: indicators are focusable `<a>` elements with focus-visible styles.
+- `prefers-reduced-motion` disables transitions.
+- Print styles hide indicators and remove strikethrough.
 
 ## Performance
 
-- **Caching**: Results are stored in `localStorage` for 7 days (configurable). A returning reader triggers zero API calls.
-- **Rate limiting**: API requests are spaced 350ms apart to avoid hitting the Wayback Machine's rate limits (60 requests/minute threshold).
-- **Deduplication**: If the same URL appears in multiple links, it's only checked once.
-- **Max cap**: Only the first 30 unique URLs per page are checked (configurable), preventing runaway behavior on archive/timeline pages with hundreds of posts.
-- **Deferred loading**: The script is loaded with `defer`, so it never blocks page rendering.
-- **Tiny footprint**: The JavaScript is ~5 KB unminified, the CSS ~1.5 KB.
+On a typical blog post with 15 external links where 2 are broken:
 
-## Limitations
+| Phase | Requests | Duration |
+|-------|----------|----------|
+| Liveness (parallel) | 15 fetches, 6 concurrent | ~1–2 seconds |
+| Archive lookup (sequential) | 2 JSONP calls | ~1 second |
+| **Total** | **17 requests** | **~2–3 seconds** |
+| **Repeat visit** | **0 requests** | **instant** |
 
-- **No broken-link detection**: The plugin doesn't verify whether the original link is still alive. It shows the archive indicator as a precaution for any link that has a Wayback Machine snapshot, regardless of whether the link is currently working.
-- **No proactive archiving**: The plugin doesn't request the Wayback Machine to archive links. If a link has never been crawled by the Internet Archive, no indicator is shown. (Tip: Use the [Wayback Machine browser extension](https://web.archive.org/) or the [Save Page Now](https://web.archive.org/save) service to proactively archive important links.)
-- **Markdown links only (mostly)**: The plugin scans all `<a>` tags in your post content containers, so it works with both Markdown links and raw HTML links. However, it only looks inside elements matching the configured content selector.
-- **JSONP dependency**: The Wayback Machine Availability API doesn't support CORS, so the plugin uses JSONP. If archive.org ever removes JSONP support, the plugin would need a proxy server or API change.
-- **Client-side only**: Since Micro.blog plugins can't run server-side code, all processing happens in the reader's browser. Search engines and RSS readers see your original content without archive indicators.
+- **Deduplication**: Same URL in multiple links is only checked once.
+- **Max cap**: 30 URLs per page (configurable) prevents runaway behavior on archive pages.
+- **Deferred loading**: Script loads with `defer` — never blocks rendering.
+- **Tiny footprint**: ~7 KB JS + ~2 KB CSS (unminified).
+
+## What it can and cannot detect
+
+### Detects (server-level failures)
+- Expired/parked domains (DNS failure)
+- Servers that have been shut down (connection refused)
+- Servers that are unreachable (timeout)
+- SSL certificate errors
+
+### Cannot detect (page-level issues)
+- Individual pages deleted on an otherwise healthy server (HTTP 404)
+- Soft 404s (server returns 200 but shows an error page)
+- Paywalled or geo-blocked content
+- Content that has changed significantly from what was linked
+
+The limitation exists because `fetch` with `mode: "no-cors"` returns an opaque response — we can tell the server responded, but not *what* it responded with. Detecting page-level 404s would require a server-side companion service.
 
 ## Comparison with the WordPress Plugin
 
 | Feature | WP Wayback Link Fixer | This plugin |
 |---------|----------------------|-------------|
 | Platform | WordPress (PHP) | Micro.blog (Hugo/JS) |
-| Link checking | Server-side, background jobs | Client-side, on page load |
-| Broken-link detection | Yes (HTTP HEAD checks) | No |
+| Broken-link detection | Server-side HEAD requests | Client-side no-cors fetch |
+| Detects 404s | Yes | No (server-level only) |
 | Proactive archiving | Yes (Save Page Now API) | No |
-| Content modification | No (JS replacement at render) | No (JS indicators at load) |
-| Rate limiting | Action Scheduler queues | Request queue with delay |
-| Caching | Custom database table | Browser localStorage |
-| Indicator style | Silent href swap | Visible archive icon |
-| RSS/crawler visibility | Original links only | Original links only |
+| Background scanning | Yes (Action Scheduler) | No (on page load) |
+| Content modification | No (JS at render time) | No (JS at load time) |
+| Indicator style | Silent href swap | Visible icon + strikethrough |
+| Caching | Server database | Browser localStorage |
+| RSS/crawler visibility | Original links | Original links |
 
 ## Future ideas
 
-- **Companion service**: A small server-side script that periodically checks your blog's links, proactively archives them via Save Page Now, and pre-populates a JSON file the plugin can read — eliminating runtime API calls entirely.
-- **Build-time integration**: A Hugo data file with pre-checked archive URLs, populated by a CI/CD step, so the archive indicators are baked into the static HTML.
-- **Broken-link highlighting**: Use the archive indicator to visually distinguish links that are likely broken (e.g., by attempting a `fetch` and detecting network errors).
+- **Companion service**: A server-side script that periodically fetches your blog's links with full HTTP status checking (catching 404s too), archives them via Save Page Now, and outputs a JSON manifest the plugin reads — eliminating all runtime API calls.
+- **Build-time integration**: Pre-checked archive data baked into the Hugo build, so archive indicators appear in the static HTML without any client-side API calls.
 
 ## Contributing
 
@@ -166,10 +193,10 @@ Issues and pull requests are welcome! This plugin is open source under the MIT L
 
 ## Credits
 
-- Built for [Micro.blog](https://micro.blog) by the plugin system described in the [Micro.blog help docs](https://help.micro.blog/t/plug-ins/104).
+- Built for [Micro.blog](https://micro.blog) using the [plugin system](https://help.micro.blog/t/plug-ins/104).
 - Uses the [Internet Archive Wayback Machine Availability API](https://archive.org/help/wayback_api.php).
 - Inspired by the [Internet Archive Wayback Machine Link Fixer](https://wordpress.org/plugins/internet-archive-wayback-machine-link-fixer/) WordPress plugin by Automattic and the Internet Archive.
-- Archive icon from the [Lucide](https://lucide.dev/) icon set (MIT License).
+- Icons from the [Lucide](https://lucide.dev/) icon set (MIT License).
 
 ## License
 

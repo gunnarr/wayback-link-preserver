@@ -2,7 +2,9 @@
   "params": {
     "wlp_indicator_style": "icon",
     "wlp_cache_days": "7",
+    "wlp_liveness_cache_days": "1",
     "wlp_max_links": "30",
+    "wlp_liveness_timeout": "8000",
     "wlp_disabled": false
   }
 }

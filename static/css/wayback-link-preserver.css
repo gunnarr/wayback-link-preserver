@@ -1,19 +1,19 @@
 /* ==========================================================================
    Wayback Link Preserver — Styles
-   Subtle archive indicators for external links with Wayback Machine snapshots.
+   Detects broken external links and shows Wayback Machine archive fallbacks.
    ========================================================================== */
 
-/* --- Archive indicator (the small icon/text after a link) --- */
+/* --- Archive indicator (clickable icon after a broken link with archive) --- */
 
 .wlp-indicator {
   display: inline-flex;
   align-items: center;
   gap: 0.15em;
-  margin-left: 0.2em;
-  padding: 0.1em 0.2em;
+  margin-left: 0.25em;
+  padding: 0.1em 0.25em;
   border-radius: 3px;
-  color: inherit;
-  opacity: 0.3;
+  color: #1a6b3c;
+  opacity: 0.75;
   text-decoration: none;
   transition: opacity 0.2s ease, background-color 0.2s ease;
   vertical-align: baseline;
@@ -22,80 +22,104 @@
 
 .wlp-indicator:hover,
 .wlp-indicator:focus-visible {
-  opacity: 0.85;
-  background-color: rgba(0, 0, 0, 0.05);
+  opacity: 1;
+  background-color: rgba(26, 107, 60, 0.08);
   outline: none;
 }
 
-/* Icon sizing */
 .wlp-indicator svg {
+  width: 0.8em;
+  height: 0.8em;
+  flex-shrink: 0;
+  vertical-align: -0.05em;
+}
+
+.wlp-indicator-text {
+  font-size: 0.7em;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+/* --- Broken link badge (non-clickable, shown when no archive exists) --- */
+
+.wlp-broken-badge {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 0.25em;
+  color: #a04040;
+  opacity: 0.5;
+  vertical-align: baseline;
+  line-height: 1;
+}
+
+.wlp-broken-badge svg {
   width: 0.75em;
   height: 0.75em;
   flex-shrink: 0;
   vertical-align: -0.05em;
 }
 
-/* Text label */
-.wlp-indicator-text {
-  font-size: 0.7em;
-  font-weight: 500;
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
+/* --- Broken link text styling --- */
+
+a.wlp-broken {
+  text-decoration-line: underline line-through;
+  text-decoration-style: solid;
+  text-decoration-color: rgba(160, 64, 64, 0.35);
 }
 
-/* --- Tooltip (appears on hover) --- */
+/* If the broken link has an archive fallback, tone down the "broken" look. */
+a.wlp-broken.wlp-has-archive {
+  text-decoration-line: underline;
+  text-decoration-style: solid;
+  text-decoration-color: inherit;
+}
 
-.wlp-indicator[title] {
+/* --- Tooltip --- */
+
+.wlp-indicator[title],
+.wlp-broken-badge[title] {
   cursor: help;
 }
 
-/* --- Optional: mark links that have archives --- */
-
-a.wlp-has-archive {
-  /* No visible change by default — the indicator does the job. */
-  /* Uncomment below to add a subtle left border: */
-  /* border-left: 2px solid rgba(0, 128, 0, 0.15); */
-  /* padding-left: 0.15em; */
-}
-
-/* --- Loading state (while checking) --- */
-
-.wlp-checking {
-  opacity: 0.15;
-  animation: wlp-pulse 1.5s ease-in-out infinite;
-}
-
-@keyframes wlp-pulse {
-  0%, 100% { opacity: 0.15; }
-  50% { opacity: 0.35; }
-}
-
-/* --- Dark mode support --- */
+/* --- Dark mode --- */
 
 @media (prefers-color-scheme: dark) {
+  .wlp-indicator {
+    color: #5ec47e;
+  }
+
   .wlp-indicator:hover,
   .wlp-indicator:focus-visible {
-    background-color: rgba(255, 255, 255, 0.1);
+    background-color: rgba(94, 196, 126, 0.12);
+  }
+
+  .wlp-broken-badge {
+    color: #d07070;
+  }
+
+  a.wlp-broken {
+    text-decoration-color: rgba(208, 112, 112, 0.4);
   }
 }
 
 /* --- Reduced motion --- */
 
 @media (prefers-reduced-motion: reduce) {
-  .wlp-checking {
-    animation: none;
-    opacity: 0.25;
-  }
-
   .wlp-indicator {
     transition: none;
   }
 }
 
-/* --- Print: hide indicators --- */
+/* --- Print: hide all indicators --- */
 
 @media print {
-  .wlp-indicator {
+  .wlp-indicator,
+  .wlp-broken-badge {
     display: none !important;
+  }
+
+  a.wlp-broken {
+    text-decoration-line: underline;
   }
 }

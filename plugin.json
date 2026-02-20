@@ -1,7 +1,7 @@
 {
-  "version": "1.0.0",
+  "version": "2.0.0",
   "title": "Wayback Link Preserver",
-  "description": "Checks external links against the Internet Archive Wayback Machine and adds archive indicators so readers always have a fallback if a link goes dead.",
+  "description": "Detects broken external links and shows clickable Wayback Machine archive fallbacks so your readers always have a way to access the content.",
   "includes": [
     "wayback-link-preserver.html",
     "/css/wayback-link-preserver.css"
@@ -9,20 +9,32 @@
   "fields": [
     {
       "field": "params.wlp_indicator_style",
-      "label": "Indicator style",
+      "label": "Indicator style (icon, text, or both)",
       "placeholder": "icon",
       "type": "string"
     },
     {
       "field": "params.wlp_cache_days",
-      "label": "Cache duration (days)",
+      "label": "Archive cache duration (days)",
       "placeholder": "7",
+      "type": "string"
+    },
+    {
+      "field": "params.wlp_liveness_cache_days",
+      "label": "Liveness cache duration (days)",
+      "placeholder": "1",
       "type": "string"
     },
     {
       "field": "params.wlp_max_links",
       "label": "Max links to check per page",
       "placeholder": "30",
+      "type": "string"
+    },
+    {
+      "field": "params.wlp_liveness_timeout",
+      "label": "Liveness check timeout (ms)",
+      "placeholder": "8000",
       "type": "string"
     },
     {
