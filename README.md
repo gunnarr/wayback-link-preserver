@@ -1,6 +1,6 @@
 # Wayback Link Preserver
 
-A [Micro.blog](https://micro.blog) plugin that fights [link rot](https://en.wikipedia.org/wiki/Link_rot). It scans every external link on your pages, detects which ones are broken, and for those that are, shows a clickable [Internet Archive Wayback Machine](https://web.archive.org/) fallback so your readers can still access the content.
+A [Micro.blog](https://micro.blog) plugin that detects broken external links on your blog and shows clickable [Wayback Machine](https://web.archive.org/) fallbacks so your readers can still access the content.
 
 ## How It Works
 

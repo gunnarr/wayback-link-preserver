@@ -1,7 +1,7 @@
 {
   "version": "2.0.0",
   "title": "Wayback Link Preserver",
-  "description": "Detects broken external links and shows clickable Wayback Machine archive fallbacks so your readers always have a way to access the content.",
+  "description": "Detects broken external links on your blog and shows clickable Wayback Machine fallbacks so your readers can still access the content.",
   "includes": [
     "wayback-link-preserver.html",
     "/css/wayback-link-preserver.css"
