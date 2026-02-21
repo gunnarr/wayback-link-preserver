@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wayback Link Preserver — Preview</title>
+<style>
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    max-width: 640px;
+    margin: 2em auto;
+    padding: 0 1em;
+    line-height: 1.7;
+    color: #333;
+  }
+  h2 { margin-top: 2em; color: #555; font-size: 1em; text-transform: uppercase; letter-spacing: 0.05em; }
+  .example { margin: 1.5em 0; padding: 1em 1.2em; background: #fafafa; border-radius: 6px; border: 1px solid #e0e0e0; }
+  a { color: #1a6b9b; }
+  hr { border: none; border-top: 1px solid #e0e0e0; margin: 2em 0; }
+
+  /* === Plugin CSS (copy from wayback-link-preserver.css) === */
+
+  .wlp-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3em;
+    margin-left: 0.35em;
+    padding: 0.2em 0.5em;
+    border-radius: 4px;
+    background-color: #e8f5ed;
+    border: 1px solid #b6dfc5;
+    color: #1a6b3c;
+    font-size: 0.82em;
+    text-decoration: none;
+    transition: background-color 0.15s ease, border-color 0.15s ease;
+    vertical-align: baseline;
+    line-height: 1.2;
+    white-space: nowrap;
+    cursor: pointer;
+  }
+  .wlp-indicator:hover,
+  .wlp-indicator:focus-visible {
+    background-color: #d0f0dc;
+    border-color: #8acda3;
+    outline: none;
+  }
+  .wlp-indicator svg {
+    width: 0.9em;
+    height: 0.9em;
+    flex-shrink: 0;
+  }
+  .wlp-indicator-text {
+    font-size: 0.85em;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+  }
+
+  .wlp-broken-badge {
+    display: inline-flex;
+    align-items: center;
+    margin-left: 0.25em;
+    color: #a04040;
+    opacity: 0.5;
+    vertical-align: baseline;
+    line-height: 1;
+  }
+  .wlp-broken-badge svg {
+    width: 0.75em;
+    height: 0.75em;
+    flex-shrink: 0;
+  }
+
+  a.wlp-broken {
+    text-decoration-line: underline line-through;
+    text-decoration-style: solid;
+    text-decoration-color: rgba(160, 64, 64, 0.35);
+  }
+  a.wlp-broken.wlp-has-archive {
+    text-decoration-line: underline;
+    text-decoration-style: solid;
+    text-decoration-color: inherit;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    body { background: #1a1a1a; color: #ddd; }
+    .example { background: #252525; border-color: #444; }
+    a { color: #6bb8e0; }
+    .wlp-indicator {
+      background-color: rgba(30, 80, 50, 0.5);
+      border-color: rgba(94, 196, 126, 0.3);
+      color: #7dd89a;
+    }
+    .wlp-indicator:hover { background-color: rgba(40, 100, 60, 0.6); border-color: rgba(94, 196, 126, 0.5); }
+    .wlp-broken-badge { color: #d07070; }
+    a.wlp-broken { text-decoration-color: rgba(208, 112, 112, 0.4); }
+  }
+</style>
+</head>
+<body>
+
+<h1>Wayback Link Preserver — Preview</h1>
+
+<h2>1. Working link (no indicator)</h2>
+<div class="example">
+  <p>Check out <a href="https://wikipedia.org">Wikipedia</a> for more info.</p>
+</div>
+
+<h2>2. Broken link + archived version available</h2>
+<div class="example">
+  <p>I wrote about this on <a href="https://example-dead-site.com/article" class="wlp-broken wlp-has-archive">my old blog</a><a href="https://web.archive.org/web/20231015/https://example-dead-site.com/article" class="wlp-indicator" target="_blank" rel="noopener noreferrer" title="This link appears broken — click to view an archived copy from 2023-10-15" aria-label="Link is broken. View archived copy from 2023-10-15"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="3" width="20" height="5" rx="1"/><path d="M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8"/><path d="M10 12h4"/></svg><span class="wlp-indicator-text">View archived copy</span></a> a few years ago.</p>
+</div>
+
+<h2>3. Broken link + no archive exists</h2>
+<div class="example">
+  <p>Here is a <a href="https://gone-forever.example" class="wlp-broken">link that is gone forever</a><span class="wlp-broken-badge" title="This link appears to be broken — no archived version available"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m18.84 12.25 1.72-1.71h-.02a5.004 5.004 0 0 0-.12-7.07 5.006 5.006 0 0 0-6.95 0l-1.72 1.71"/><path d="m5.17 11.75-1.71 1.71a5.004 5.004 0 0 0 .12 7.07 5.006 5.006 0 0 0 6.95 0l1.71-1.71"/><line x1="8" y1="2" x2="8" y2="5"/><line x1="2" y1="8" x2="5" y2="8"/><line x1="16" y1="19" x2="16" y2="22"/><line x1="19" y1="16" x2="22" y2="16"/></svg></span> with no archive.</p>
+</div>
+
+<h2>4. Multiple links in a paragraph</h2>
+<div class="example">
+  <p>
+    I recommend <a href="https://wikipedia.org">Wikipedia</a>,
+    but sadly <a href="https://dead-link.example/page" class="wlp-broken wlp-has-archive">this resource</a><a href="https://web.archive.org/web/20220305/https://dead-link.example/page" class="wlp-indicator" target="_blank" title="This link appears broken — click to view an archived copy from 2022-03-05"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="3" width="20" height="5" rx="1"/><path d="M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8"/><path d="M10 12h4"/></svg><span class="wlp-indicator-text">View archived copy</span></a>
+    is no longer online and
+    <a href="https://also-gone.example" class="wlp-broken">this one</a><span class="wlp-broken-badge" title="This link appears to be broken — no archived version available"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m18.84 12.25 1.72-1.71h-.02a5.004 5.004 0 0 0-.12-7.07 5.006 5.006 0 0 0-6.95 0l-1.72 1.71"/><path d="m5.17 11.75-1.71 1.71a5.004 5.004 0 0 0 .12 7.07 5.006 5.006 0 0 0 6.95 0l1.71-1.71"/><line x1="8" y1="2" x2="8" y2="5"/><line x1="2" y1="8" x2="5" y2="8"/><line x1="16" y1="19" x2="16" y2="22"/><line x1="19" y1="16" x2="22" y2="16"/></svg></span>
+    is completely gone.
+  </p>
+</div>
+
+<hr>
+<p style="font-size: 0.85em; color: #888;">Hover over the green badges and broken-link icons to see tooltips. Respects dark mode.</p>
+
+</body>
+</html>

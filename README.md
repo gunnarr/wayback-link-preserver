@@ -30,11 +30,13 @@ Returning visitors trigger zero network requests until caches expire.
 
 ### What it looks like
 
-A broken link with an archived version:
+Open [`preview.html`](preview.html) in your browser to see all three states in action:
 
-> Check out ~~[this great article](https://example.com/article)~~ 🗃
+1. **Working link** — completely untouched.
+2. **Broken + archived** — a green `View archived copy` badge appears after the link.
+3. **Broken + no archive** — a small broken-link icon appears as a visual hint.
 
-The 🗃 icon links to the archived copy. Working links look completely normal.
+Working links look completely normal. Only broken links get indicators.
 
 ## Installation
 
