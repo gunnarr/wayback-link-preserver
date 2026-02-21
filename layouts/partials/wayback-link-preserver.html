@@ -6,7 +6,6 @@
 -->
 <script>
 window.WaybackLinkPreserver = {
-  indicatorStyle: {{ .Site.Params.wlp_indicator_style | default "icon" | jsonify }},
   cacheDays: parseInt({{ .Site.Params.wlp_cache_days | default "7" | jsonify }}, 10) || 7,
   livenessCacheDays: parseInt({{ .Site.Params.wlp_liveness_cache_days | default "1" | jsonify }}, 10) || 1,
   maxLinksPerPage: parseInt({{ .Site.Params.wlp_max_links | default "30" | jsonify }}, 10) || 30,

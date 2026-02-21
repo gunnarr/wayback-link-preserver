@@ -57,7 +57,6 @@ After installing, go to **Plug-ins** → **Wayback Link Preserver** to configure
 
 | Setting | Default | Description |
 |---------|---------|-------------|
-| **Indicator style** | `icon` | How the archive link looks. Options: `icon` (small archive icon), `text` (the word "archived"), `both`. |
 | **Archive cache (days)** | `7` | How long Wayback lookup results are cached per reader. |
 | **Liveness cache (days)** | `1` | How long liveness results are cached. Lower = more responsive to sites coming back. |
 | **Max links per page** | `30` | Cap on unique URLs to check per page load. |

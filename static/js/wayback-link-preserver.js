@@ -58,9 +58,6 @@
     /** Timeout in ms for each liveness fetch. */
     livenessTimeout: userConfig.livenessTimeout || 8000,
 
-    /** Visual style of the archive indicator: "icon", "text", or "both". */
-    indicatorStyle: userConfig.indicatorStyle || "both",
-
     /** JSONP request timeout in ms. */
     jsonpTimeout: userConfig.jsonpTimeout || 10000,
   };
@@ -402,14 +399,7 @@
     el.title = "This link appears broken — click to view an archived copy from " + date;
     el.setAttribute("aria-label", "Link is broken. View archived copy from " + date);
 
-    var html = "";
-    if (config.indicatorStyle === "icon" || config.indicatorStyle === "both") {
-      html += ICON_ARCHIVE;
-    }
-    if (config.indicatorStyle === "text" || config.indicatorStyle === "both") {
-      html += '<span class="wlp-indicator-text">View archived copy</span>';
-    }
-    el.innerHTML = html;
+    el.innerHTML = ICON_ARCHIVE + '<span class="wlp-indicator-text">View archived copy</span>';
     return el;
   }
 

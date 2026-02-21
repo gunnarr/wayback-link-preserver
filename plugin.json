@@ -8,12 +8,6 @@
   ],
   "fields": [
     {
-      "field": "params.wlp_indicator_style",
-      "label": "Indicator style (icon, text, or both)",
-      "placeholder": "both",
-      "type": "string"
-    },
-    {
       "field": "params.wlp_cache_days",
       "label": "Archive cache duration (days)",
       "placeholder": "7",
