@@ -3,42 +3,44 @@
    Detects broken external links and shows Wayback Machine archive fallbacks.
    ========================================================================== */
 
-/* --- Archive indicator (clickable icon after a broken link with archive) --- */
+/* --- Archive indicator (clickable badge after a broken link with archive) --- */
 
 .wlp-indicator {
   display: inline-flex;
   align-items: center;
-  gap: 0.15em;
-  margin-left: 0.25em;
-  padding: 0.1em 0.25em;
-  border-radius: 3px;
+  gap: 0.3em;
+  margin-left: 0.35em;
+  padding: 0.2em 0.5em;
+  border-radius: 4px;
+  background-color: #e8f5ed;
+  border: 1px solid #b6dfc5;
   color: #1a6b3c;
-  opacity: 0.75;
+  font-size: 0.82em;
   text-decoration: none;
-  transition: opacity 0.2s ease, background-color 0.2s ease;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
   vertical-align: baseline;
-  line-height: 1;
+  line-height: 1.2;
+  white-space: nowrap;
+  cursor: pointer;
 }
 
 .wlp-indicator:hover,
 .wlp-indicator:focus-visible {
-  opacity: 1;
-  background-color: rgba(26, 107, 60, 0.08);
+  background-color: #d0f0dc;
+  border-color: #8acda3;
   outline: none;
 }
 
 .wlp-indicator svg {
-  width: 0.8em;
-  height: 0.8em;
+  width: 0.9em;
+  height: 0.9em;
   flex-shrink: 0;
-  vertical-align: -0.05em;
 }
 
 .wlp-indicator-text {
-  font-size: 0.7em;
+  font-size: 0.85em;
   font-weight: 600;
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
+  letter-spacing: 0.01em;
 }
 
 /* --- Broken link badge (non-clickable, shown when no archive exists) --- */
@@ -86,12 +88,15 @@ a.wlp-broken.wlp-has-archive {
 
 @media (prefers-color-scheme: dark) {
   .wlp-indicator {
-    color: #5ec47e;
+    background-color: rgba(30, 80, 50, 0.5);
+    border-color: rgba(94, 196, 126, 0.3);
+    color: #7dd89a;
   }
 
   .wlp-indicator:hover,
   .wlp-indicator:focus-visible {
-    background-color: rgba(94, 196, 126, 0.12);
+    background-color: rgba(40, 100, 60, 0.6);
+    border-color: rgba(94, 196, 126, 0.5);
   }
 
   .wlp-broken-badge {

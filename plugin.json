@@ -10,7 +10,7 @@
     {
       "field": "params.wlp_indicator_style",
       "label": "Indicator style (icon, text, or both)",
-      "placeholder": "icon",
+      "placeholder": "both",
       "type": "string"
     },
     {
