@@ -22,7 +22,7 @@
  * fetch) and, for broken links only, to archive.org's public API. No
  * visitor data, cookies, or personal information is transmitted.
  *
- * @version 2.0.0
+ * @version 1.0.0
  * @license MIT
  */
 (function () {

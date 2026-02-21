@@ -1,5 +1,5 @@
 {
-  "version": "2.0.0",
+  "version": "1.0.0",
   "title": "Wayback Link Preserver",
   "description": "Detects broken external links on your blog and shows clickable Wayback Machine fallbacks so your readers can still access the content.",
   "includes": [
